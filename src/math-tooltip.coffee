@@ -32,11 +32,11 @@ class MathTooltip extends Tooltip
       return unless range? and range.isCollapsed()
       anchor = @_findAnchor(range)
       if anchor
-        # @setMode(dom(anchor).attributes()['href'].substring('math:'.length), false)
+        # @setMode(dom(anchor).attributes()['data-math'].substring('math:'.length), false)
 
         # @quill.setSelection(start, end)
 
-        @setMode(dom(anchor).attributes()['href'].substring('math:'.length), true)
+        @setMode(dom(anchor).attributes()['data-math'].substring('math:'.length), true)
         @show(anchor)
       else
         @range = null # Tooltip.hide will try to use this which causes the tooltip to open back up
@@ -46,7 +46,7 @@ class MathTooltip extends Tooltip
     dom(@container.querySelector('.done')).on('click', _.bind(@saveMath, @))
     dom(@container.querySelector('.cancel')).on('click', _.bind(@hide, @))
     # dom(@container.querySelector('.change')).on('click', =>
-    #   @setMode(dom(@link).attributes()['href'].substring('#'.length), true)
+    #   @setMode(dom(@link).attributes()['data-math'].substring('#'.length), true)
     @range = null # Tooltip.hide will try to use this which causes the tooltip to open back up
     # )
 
@@ -64,7 +64,7 @@ class MathTooltip extends Tooltip
 
   _updateMathPreview: ->
     if @currentMathEl
-      originalFormula = dom(@currentMathEl).attributes()['href'].substring('math:'.length)
+      originalFormula = dom(@currentMathEl).attributes()['data-math'].substring('math:'.length)
       formula = @textbox.value
       if formula isnt originalFormula
         try
@@ -78,7 +78,7 @@ class MathTooltip extends Tooltip
 
 
   renderMath: (node) ->
-    formula = dom(node).attributes()['href'].substring('math:'.length)
+    formula = dom(node).attributes()['data-math'].substring('math:'.length)
     try
       katex.render(formula, node)
     catch e
@@ -87,7 +87,7 @@ class MathTooltip extends Tooltip
 
   show: (@currentMathEl) ->
     super(arguments...)
-    # @initialFormula = dom(@currentMathEl).attributes()['href'].substring('math:'.length)
+    # @initialFormula = dom(@currentMathEl).attributes()['data-math'].substring('math:'.length)
 
   hide: ->
     @range = null # Tooltip.hide will try to use this which causes the tooltip to open back up
@@ -99,13 +99,13 @@ class MathTooltip extends Tooltip
     if @range?
       if @range.isCollapsed()
         anchor = @_findAnchor(@range)
-        dom(anchor).attributes({'href':"math:#{url}"}) if anchor?
+        dom(anchor).attributes({'data-math':"math:#{url}"}) if anchor?
         @renderMath(anchor)
       else
         @quill.formatText(@range, 'math', url, 'user')
         # HACK: Render all Math. Should only render new Math elements (:not(.rendered))
-        for math in @quill.editor.root.querySelectorAll('[href^="math:"]')
-          formula = dom(math).attributes()['href'].substring('math:'.length)
+        for math in @quill.editor.root.querySelectorAll('[data-math^="math:"]')
+          formula = dom(math).attributes()['data-math'].substring('math:'.length)
           try
             katex.render(formula, math)
           catch e
@@ -124,7 +124,7 @@ class MathTooltip extends Tooltip
       )
     else
       @textbox.value = url
-      # @link.href = url
+      # @link.data-math = url
       # text = if url.length > @options.maxLength then url.slice(0, @options.maxLength) + '...' else url
       # dom(@link).text(text)
     dom(@container).toggleClass('editing', edit)
@@ -133,7 +133,7 @@ class MathTooltip extends Tooltip
     [leaf, offset] = @quill.editor.doc.findLeafAt(range.start, true)
     node = leaf.node if leaf?
     while node?
-      return node if dom(node).attributes()['href']?.substring('math:'.length)
+      return node if dom(node).attributes()['data-math']?.substring('math:'.length)
       node = node.parentNode
     return null
 
@@ -153,9 +153,9 @@ class MathTooltip extends Tooltip
 
 renderAllMath = (quill) ->
   # Render math
-  for math in quill.editor.root.querySelectorAll('[href^="math:"]:not(.loaded)')
+  for math in quill.editor.root.querySelectorAll('[data-math^="math:"]:not(.loaded)')
     # math.contentEditable = false
-    formula = dom(math).attributes()['href'].substring('math:'.length)
+    formula = dom(math).attributes()['data-math'].substring('math:'.length)
     try
       katex.render(formula, math)
       math.classList.add('loaded')

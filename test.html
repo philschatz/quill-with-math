@@ -3,8 +3,8 @@
   <head>
     <link rel="stylesheet" href="./katex.css"/>
     <style>
-      a[href^="math:"] { background-color: #3f3; display: inline-block; margin: 1px; cursor: pointer; }
-      a[href^="math:"]:hover { border: 1px solid #090; margin: 0; }
+      [data-math^="math:"] { background-color: #3f3; display: inline-block; margin: 1px; cursor: pointer; }
+      [data-math^="math:"]:hover { border: 1px solid #090; margin: 0; }
     </style>
   </head>
 
@@ -20,7 +20,7 @@
 <!-- Create the editor container -->
 <div id="editor">
   <div>Hello World!</div>
-  <div>A Sentence with some <a href="math:\frac {\sqrt{b^2 - 4ac}} 2 + 4">mathymath</a>.</div>
+  <div>A Sentence with some <span data-math="math:\frac {\sqrt{b^2 - 4ac}} 2 + 4">mathymath</span>.</div>
   <br/>
   <br/>
   <br/>

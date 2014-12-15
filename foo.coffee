@@ -6,17 +6,28 @@ dom = Quill.require 'dom'
 Normalizer = Quill.require 'normalizer'
 Line = Quill.require 'core/line'
 Leaf = Quill.require 'core/leaf'
+Format = Quill.require 'core/format'
 
 katex = require 'katex'
 
+Quill.DEFAULTS.formats.push('math')
+
+# Add math to the default formats so the paste-manager div can handle them instead of just stripping the math span out
+Format.FORMATS['math'] =
+  attribute: 'data-math'
+  tag: 'SPAN'
+
+
 editor = new Quill('#editor')
 editor.addModule('toolbar', { container: '#toolbar' })
-# editor.addModule('link-tooltip', true)
+editor.addModule('link-tooltip', true)
 editor.addModule('math-tooltip', true)
 
-editor.addFormat 'math',
-  attribute: 'href'
-  tag: 'A'
+
+
+# editor.addFormat 'math',
+#   attribute: 'data-math'
+#   tag: 'SPAN'
 
 
 
@@ -30,7 +41,7 @@ matches = (el, selector) ->
 Normalizer_whitelistStyles = Normalizer.whitelistStyles
 Normalizer.whitelistStyles = (node) ->
   # Check parents of the node to see if it is inside a 'katex' span
-  return if matches(node, '[href^="math:"] *')
+  return if matches(node, '[data-math^="math:"] *')
   Normalizer_whitelistStyles(node)
 
 
@@ -47,7 +58,7 @@ Normalizer.optimizeLine = (lineNode) ->
       if node.tagName == dom.DEFAULT_BREAK_TAG
         # Remove unneeded BRs
         dom(node).remove() unless lineNodeLength == 0
-      else if dom(node).length() == 0 and not matches(node, '[href^="math:"] *')
+      else if dom(node).length() == 0 and not matches(node, '[data-math^="math:"] *')
         nodes.push(node.nextSibling)
         dom(node).unwrap()
       else if node.previousSibling? and node.tagName == node.previousSibling.tagName
@@ -59,7 +70,7 @@ Normalizer.optimizeLine = (lineNode) ->
 
 # Line_buildLeaves = Line::buildLeaves
 # Line::buildLeaves = (node, formats) ->
-#   if matches(node, '[href^="math:"]')
+#   if matches(node, '[data-math^="math:"]')
 #     # Strip the HTML child nodes so the range/leaf calculator works, but then put the rendered katex output back
 #     # node.classList.remove('loaded')
 #     # innerHTML = node.innerHTML
@@ -87,7 +98,7 @@ Line::findLeaf = (leafNode) ->
 
 Leaf_isLeafNode = Leaf.isLeafNode
 Leaf.isLeafNode = (node, formats) ->
-  return true if matches(node, '[href^="math:"] .katex')
+  return true if matches(node, '[data-math^="math:"] .katex')
   return Leaf_isLeafNode.apply(@, arguments)
 
 
