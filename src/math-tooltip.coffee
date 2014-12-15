@@ -15,7 +15,8 @@ class MathTooltip extends Tooltip
       <div class="preview"></div>
       <div class="preview-error"></div>
       <button class="cancel">Cancel</button>
-      <button class="update">Update</button>'
+      <button class="update">Update</button>
+      <button class="remove">Remove</button>'
 
   constructor: (@quill, @options) ->
     @options = _.defaults(@options, Tooltip.DEFAULTS)
@@ -25,6 +26,7 @@ class MathTooltip extends Tooltip
     @preview = @container.querySelector('.preview')
     @previewError = @container.querySelector('.preview-error')
     @updateButton = @container.querySelector('.update')
+    @removeButton = @container.querySelector('.remove')
     @initListeners()
 
   initListeners: ->
@@ -48,6 +50,7 @@ class MathTooltip extends Tooltip
         @hide()
     )
     dom(@updateButton).on('click', _.bind(@saveMath, @))
+    dom(@removeButton).on('click', _.bind(@removeMath, @))
     dom(@container.querySelector('.cancel')).on('click', _.bind(@hide, @))
     # dom(@container.querySelector('.change')).on('click', =>
     #   @setMode(dom(@link).attributes()['data-math'].substring('#'.length), true)
@@ -120,6 +123,17 @@ class MathTooltip extends Tooltip
 
     @setMode(url, false)
     @hide()
+
+
+  removeMath: ->
+    node = @_findAnchor(@range)
+    formula = dom(node).attributes()['data-math']?.substring('math:'.length)
+
+    node.removeAttribute('data-math')
+    node = dom(node).switchTag(dom.DEFAULT_INLINE_TAG)
+    node.removeClass('loaded')
+    node.text(formula)
+
 
   setMode: (url, edit = false) ->
     if edit

@@ -1,4 +1,4 @@
-- [ ] add "Remove" button to remove math
+- [x] add "Remove" button to remove math
 - [ ] get rid of `data-math="true"` bug
 - [ ] genericize parse error message (on hover show the full katex error)
 - [x] disable "Update" button
