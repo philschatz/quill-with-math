@@ -9,13 +9,13 @@ class MathTooltip extends Tooltip
   @DEFAULTS:
     maxLength: 50
     template:
-     '<span class="title">Edit &nbsp;</span>
+     '<span class="title">Edit Formula &nbsp;</span>
       <input class="math-input" type="text">
       <span>&nbsp;&#45;&nbsp;</span>
       <div class="preview"></div>
       <div class="preview-error"></div>
       <button class="cancel">Cancel</button>
-      <button class="done">Done</button>'
+      <button class="update">Update</button>'
 
   constructor: (@quill, @options) ->
     @options = _.defaults(@options, Tooltip.DEFAULTS)
@@ -24,6 +24,7 @@ class MathTooltip extends Tooltip
     @textbox = @container.querySelector('.math-input')
     @preview = @container.querySelector('.preview')
     @previewError = @container.querySelector('.preview-error')
+    @updateButton = @container.querySelector('.update')
     @initListeners()
 
   initListeners: ->
@@ -36,14 +37,17 @@ class MathTooltip extends Tooltip
 
         # @quill.setSelection(start, end)
 
-        @setMode(dom(anchor).attributes()['data-math'].substring('math:'.length), true)
+        formula = dom(anchor).attributes()['data-math'].substring('math:'.length)
+        @setMode(formula, true)
+        @_currentInitialFormula = formula
+        @_currentMathEl = anchor
         @show(anchor)
       else
         @range = null # Tooltip.hide will try to use this which causes the tooltip to open back up
         @range = null   # Prevent restoring selection to last saved
         @hide()
     )
-    dom(@container.querySelector('.done')).on('click', _.bind(@saveMath, @))
+    dom(@updateButton).on('click', _.bind(@saveMath, @))
     dom(@container.querySelector('.cancel')).on('click', _.bind(@hide, @))
     # dom(@container.querySelector('.change')).on('click', =>
     #   @setMode(dom(@link).attributes()['data-math'].substring('#'.length), true)
@@ -63,18 +67,20 @@ class MathTooltip extends Tooltip
 
 
   _updateMathPreview: ->
-    if @currentMathEl
-      originalFormula = dom(@currentMathEl).attributes()['data-math'].substring('math:'.length)
-      formula = @textbox.value
-      if formula isnt originalFormula
-        try
-          katex.render(formula, @preview)
-          @previewError.innerHTML = ''
-        catch e
-          @previewError.innerHTML = "Parse Problem: #{e.message}"
-      else
-        @preview.innerHTML = ''
+    formula = @textbox.value
+    if formula isnt @_currentInitialFormula
+      try
+        katex.render(formula, @preview)
+        dom(@updateButton).removeClass('disabled')
         @previewError.innerHTML = ''
+      catch e
+        dom(@updateButton).addClass('disabled')
+        @preview.innerHTML = ''
+        @previewError.innerHTML = "Parse Problem: #{e.message}"
+    else
+      dom(@updateButton).addClass('disabled')
+      @preview.innerHTML = ''
+      @previewError.innerHTML = ''
 
 
   renderMath: (node) ->
@@ -85,12 +91,13 @@ class MathTooltip extends Tooltip
       node.innerHTML = e.message
 
 
-  show: (@currentMathEl) ->
+  show: ->
+    @_updateMathPreview()
     super(arguments...)
-    # @initialFormula = dom(@currentMathEl).attributes()['data-math'].substring('math:'.length)
 
   hide: ->
     @range = null # Tooltip.hide will try to use this which causes the tooltip to open back up
+    @_currentInitialFormula = null
     super(arguments...)
 
 
@@ -102,7 +109,7 @@ class MathTooltip extends Tooltip
         dom(anchor).attributes({'data-math':"math:#{url}"}) if anchor?
         @renderMath(anchor)
       else
-        @quill.formatText(@range, 'math', url, 'user')
+        @quill.formatText(@range, 'math', "math:#{url}", 'user')
         # HACK: Render all Math. Should only render new Math elements (:not(.rendered))
         for math in @quill.editor.root.querySelectorAll('[data-math^="math:"]')
           formula = dom(math).attributes()['data-math'].substring('math:'.length)
