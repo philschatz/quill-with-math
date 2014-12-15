@@ -1,0 +1,8 @@
+- [ ] add "Remove" button to remove math
+- [ ] get rid of `data-math="true"` bug
+- [ ] genericize parse error message (on hover show the full katex error)
+- [ ] disable "Done" button
+  - [ ] when nothing changed
+  - [ ] when parse error occurs
+- [ ] backspace highlights math (so double backspace deletes it)
+- [ ] allow cursor just before or just after the math (maybe with a space character that somehow gets stripped?)
