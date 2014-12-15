@@ -1,0 +1,18 @@
+{
+  "name": "quill-modules",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "coffeeify": "^1.0.0",
+    "dom": "0.0.3",
+    "katex": "^0.1.1",
+    "lodash": "^2.4.1",
+    "quill": "philschatz/quill#normalizer"
+  }
+}
