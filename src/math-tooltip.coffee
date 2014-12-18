@@ -1,9 +1,13 @@
 Quill   = require('quill')
+katex   = require('katex')
+
+Toolbar = Quill.modules.toolbar
 Tooltip = Quill.modules.tooltip # require('./tooltip.coffee')
 _       = Quill.require('lodash')
 dom     = Quill.require('dom')
 
-katex   = require('katex')
+
+Toolbar.formats.TOOLTIP['math'] = 'math'
 
 class MathTooltip extends Tooltip
   @DEFAULTS:

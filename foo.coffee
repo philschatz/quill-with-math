@@ -106,3 +106,4 @@ Leaf.isLeafNode = (node, formats) ->
 
 
 window.EDITOR = editor
+window.Quill = Quill

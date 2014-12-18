@@ -123,6 +123,8 @@ Leaf.isLeafNode = function(node, formats) {
 
 window.EDITOR = editor;
 
+window.Quill = Quill;
+
 
 
 },{"./src/math-tooltip.coffee":19,"katex":2,"quill":18}],2:[function(require,module,exports){
@@ -13725,11 +13727,15 @@ module.exports = SnowTheme;
 module.exports = require('./dist/quill');
 
 },{"./dist/quill":17}],19:[function(require,module,exports){
-var MathTooltip, Quill, Tooltip, dom, katex, renderAllMath, _,
+var MathTooltip, Quill, Toolbar, Tooltip, dom, katex, renderAllMath, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Quill = require('quill');
+
+katex = require('katex');
+
+Toolbar = Quill.modules.toolbar;
 
 Tooltip = Quill.modules.tooltip;
 
@@ -13737,7 +13743,7 @@ _ = Quill.require('lodash');
 
 dom = Quill.require('dom');
 
-katex = require('katex');
+Toolbar.formats.TOOLTIP['math'] = 'math';
 
 MathTooltip = (function(_super) {
   __extends(MathTooltip, _super);
