@@ -1,13 +1,12 @@
 {
-  "name": "quill-modules",
+  "name": "quill-module-math",
   "version": "0.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "build.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC",
   "devDependencies": {
     "coffeeify": "^1.0.0",
     "dom": "0.0.3",

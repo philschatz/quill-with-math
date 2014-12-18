@@ -3,9 +3,15 @@
   <head>
     <link rel="stylesheet" href="./katex.css"/>
     <style>
-      [data-math^="math:"] { background-color: #3f3; display: inline-block; margin: 1px; cursor: pointer; }
-      [data-math^="math:"]:hover { border: 1px solid #090; margin: 0; }
+      [data-math] { background-color: #eee; display: inline-block; margin: 1px; cursor: pointer; }
+      [data-math]:hover { border: 1px solid #3cc; margin: 0; }
+      .ql-active { font-weight: bold; }
       .update.disabled { color: gray; }
+      .ql-tooltip {
+        padding: 5px 10px;
+        box-shadow: 0 6px 15px 0 rgba(0,0,0,0.2),0 4px 10px 0 rgba(0,0,0,.1);
+      }
+      .ql-tooltip.ql-math-tooltip .math-input { width: 200px; }
     </style>
   </head>
 
@@ -14,14 +20,26 @@
 <div id="toolbar">
   <button class="ql-bold">Bold</button>
   <button class="ql-italic">Italic</button>
+  <button class="ql-list">Numbered List</button>
+  <button class="ql-bullet">Bullet List</button>
   <button class="ql-link">Link</button>
   <button class="ql-math">Math</button>
 </div>
 
 <!-- Create the editor container -->
 <div id="editor">
-  <div>Hello World!</div>
-  <div>A Sentence with some <span data-math="math:\frac {\sqrt{b^2 - 4ac}} 2 + 4">mathymath</span>.</div>
+  <h2>Hello World!</h2>
+  <div>A Sentence with some Math: <span data-math="math:\frac {\sqrt{b^2 - 4ac}} 2 + 4">[math]</span>.</div>
+  <p>It <i>also</i> does <a href="http://cnx.org"><i>Hyper</i><b>links</b></a> with <b>formatting</b></p>
+  <p>Lists:</p>
+  <ol>
+    <li>One fish</li>
+    <li>Two fish</li>
+  </ol>
+  <ul>
+    <li>Red fish</li>
+    <li>Blue fish</li>
+  </ul>
   <br/>
   <br/>
   <br/>
