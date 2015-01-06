@@ -1,6 +1,8 @@
 Quill   = require('quill')
 katex   = require('katex')
 
+require('./monkeypatch.coffee') # Apply patches so copy/paste works and so `math` is one of the formats
+
 Toolbar = Quill.modules.toolbar
 Tooltip = Quill.modules.tooltip # require('./tooltip.coffee')
 _       = Quill.require('lodash')

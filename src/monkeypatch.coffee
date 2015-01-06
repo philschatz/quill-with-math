@@ -1,14 +1,12 @@
 Quill = require 'quill'
-MathTooltip = require './src/math-tooltip.coffee'
 
-_ = Quill.require 'lodash'
-dom = Quill.require 'dom'
-Normalizer = Quill.require 'normalizer'
-Line = Quill.require 'core/line'
-Leaf = Quill.require 'core/leaf'
-Format = Quill.require 'core/format'
-
-katex = require 'katex'
+_           = Quill.require 'lodash'
+dom         = Quill.require 'dom'
+# Getting access to the following requires a custom version of quill that exposes these internals
+Normalizer  = Quill.require 'normalizer'
+Line        = Quill.require 'core/line'
+Leaf        = Quill.require 'core/leaf'
+Format      = Quill.require 'core/format'
 
 Quill.DEFAULTS.formats.push('math')
 
@@ -16,19 +14,6 @@ Quill.DEFAULTS.formats.push('math')
 Format.FORMATS['math'] =
   attribute: 'data-math'
   tag: 'SPAN'
-
-
-editor = new Quill('#editor')
-editor.addModule('toolbar', { container: '#toolbar' })
-editor.addModule('link-tooltip', true)
-editor.addModule('math-tooltip', true)
-
-
-
-# editor.addFormat 'math',
-#   attribute: 'data-math'
-#   tag: 'SPAN'
-
 
 
 # Monkeypatch normalizer to keep katex styles in math elements
@@ -100,10 +85,3 @@ Leaf_isLeafNode = Leaf.isLeafNode
 Leaf.isLeafNode = (node, formats) ->
   return true if matches(node, '[data-math^="math:"] .katex')
   return Leaf_isLeafNode.apply(@, arguments)
-
-
-
-
-
-window.EDITOR = editor
-window.Quill = Quill

@@ -1,30 +1,9 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Format, Leaf, Leaf_isLeafNode, Line, Line_findLeaf, MathTooltip, Normalizer, Normalizer_optimizeLine, Normalizer_whitelistStyles, Quill, dom, editor, katex, matches, _;
+var MathTooltip, Quill, editor;
 
 Quill = require('quill');
 
 MathTooltip = require('./src/math-tooltip.coffee');
-
-_ = Quill.require('lodash');
-
-dom = Quill.require('dom');
-
-Normalizer = Quill.require('normalizer');
-
-Line = Quill.require('core/line');
-
-Leaf = Quill.require('core/leaf');
-
-Format = Quill.require('core/format');
-
-katex = require('katex');
-
-Quill.DEFAULTS.formats.push('math');
-
-Format.FORMATS['math'] = {
-  attribute: 'data-math',
-  tag: 'SPAN'
-};
 
 editor = new Quill('#editor');
 
@@ -36,98 +15,13 @@ editor.addModule('link-tooltip', true);
 
 editor.addModule('math-tooltip', true);
 
-matches = function(el, selector) {
-  var m;
-  m = el.matches || el.matchesSelector || el.msMatchesSelector || el.mozMatchesSelector || el.webkitMatchesSelector || el.oMatchesSelector;
-  if (!m) {
-    return false;
-  }
-  return m.call(el, selector);
-};
-
-Normalizer_whitelistStyles = Normalizer.whitelistStyles;
-
-Normalizer.whitelistStyles = function(node) {
-  if (matches(node, '[data-math^="math:"] *')) {
-    return;
-  }
-  return Normalizer_whitelistStyles(node);
-};
-
-Normalizer_optimizeLine = Normalizer.optimizeLine;
-
-Normalizer.optimizeLine = function(lineNode) {
-  var lineNodeLength, node, nodes, _results;
-  lineNode.normalize();
-  lineNodeLength = dom(lineNode).length();
-  nodes = dom(lineNode).descendants();
-  _results = [];
-  while (nodes.length > 0) {
-    node = nodes.pop();
-    if ((node != null ? node.parentNode : void 0) == null) {
-      continue;
-    }
-    if (dom.EMBED_TAGS[node.tagName] != null) {
-      continue;
-    }
-    if (node.tagName === dom.DEFAULT_BREAK_TAG) {
-      if (lineNodeLength !== 0) {
-        _results.push(dom(node).remove());
-      } else {
-        _results.push(void 0);
-      }
-    } else if (dom(node).length() === 0 && !matches(node, '[data-math^="math:"] *')) {
-      nodes.push(node.nextSibling);
-      _results.push(dom(node).unwrap());
-    } else if ((node.previousSibling != null) && node.tagName === node.previousSibling.tagName) {
-      if (_.isEqual(dom(node).attributes(), dom(node.previousSibling).attributes())) {
-        nodes.push(node.firstChild);
-        _results.push(dom(node.previousSibling).merge(node));
-      } else {
-        _results.push(void 0);
-      }
-    } else {
-      _results.push(void 0);
-    }
-  }
-  return _results;
-};
-
-Line_findLeaf = Line.prototype.findLeaf;
-
-Line.prototype.findLeaf = function(leafNode) {
-  var curLeaf, found, leafNodeDom;
-  found = Line_findLeaf.apply(this, arguments);
-  if (found != null) {
-    return found;
-  } else {
-    leafNodeDom = dom(leafNode);
-    curLeaf = this.leaves.first;
-    while (curLeaf != null) {
-      if (leafNodeDom.isAncestor(curLeaf.node)) {
-        return curLeaf;
-      }
-      curLeaf = curLeaf.next;
-    }
-  }
-};
-
-Leaf_isLeafNode = Leaf.isLeafNode;
-
-Leaf.isLeafNode = function(node, formats) {
-  if (matches(node, '[data-math^="math:"] .katex')) {
-    return true;
-  }
-  return Leaf_isLeafNode.apply(this, arguments);
-};
-
 window.EDITOR = editor;
 
 window.Quill = Quill;
 
 
 
-},{"./src/math-tooltip.coffee":19,"katex":2,"quill":18}],2:[function(require,module,exports){
+},{"./src/math-tooltip.coffee":19,"quill":18}],2:[function(require,module,exports){
 /**
  * This is the main entry point for KaTeX. Here, we expose functions for
  * rendering expressions either to DOM nodes or to markup strings.
@@ -13735,6 +13629,8 @@ Quill = require('quill');
 
 katex = require('katex');
 
+require('./monkeypatch.coffee');
+
 Toolbar = Quill.modules.toolbar;
 
 Tooltip = Quill.modules.tooltip;
@@ -13967,4 +13863,115 @@ module.exports = MathTooltip;
 
 
 
-},{"katex":2,"quill":18}]},{},[1]);
+},{"./monkeypatch.coffee":20,"katex":2,"quill":18}],20:[function(require,module,exports){
+var Format, Leaf, Leaf_isLeafNode, Line, Line_findLeaf, Normalizer, Normalizer_optimizeLine, Normalizer_whitelistStyles, Quill, dom, matches, _;
+
+Quill = require('quill');
+
+_ = Quill.require('lodash');
+
+dom = Quill.require('dom');
+
+Normalizer = Quill.require('normalizer');
+
+Line = Quill.require('core/line');
+
+Leaf = Quill.require('core/leaf');
+
+Format = Quill.require('core/format');
+
+Quill.DEFAULTS.formats.push('math');
+
+Format.FORMATS['math'] = {
+  attribute: 'data-math',
+  tag: 'SPAN'
+};
+
+matches = function(el, selector) {
+  var m;
+  m = el.matches || el.matchesSelector || el.msMatchesSelector || el.mozMatchesSelector || el.webkitMatchesSelector || el.oMatchesSelector;
+  if (!m) {
+    return false;
+  }
+  return m.call(el, selector);
+};
+
+Normalizer_whitelistStyles = Normalizer.whitelistStyles;
+
+Normalizer.whitelistStyles = function(node) {
+  if (matches(node, '[data-math^="math:"] *')) {
+    return;
+  }
+  return Normalizer_whitelistStyles(node);
+};
+
+Normalizer_optimizeLine = Normalizer.optimizeLine;
+
+Normalizer.optimizeLine = function(lineNode) {
+  var lineNodeLength, node, nodes, _results;
+  lineNode.normalize();
+  lineNodeLength = dom(lineNode).length();
+  nodes = dom(lineNode).descendants();
+  _results = [];
+  while (nodes.length > 0) {
+    node = nodes.pop();
+    if ((node != null ? node.parentNode : void 0) == null) {
+      continue;
+    }
+    if (dom.EMBED_TAGS[node.tagName] != null) {
+      continue;
+    }
+    if (node.tagName === dom.DEFAULT_BREAK_TAG) {
+      if (lineNodeLength !== 0) {
+        _results.push(dom(node).remove());
+      } else {
+        _results.push(void 0);
+      }
+    } else if (dom(node).length() === 0 && !matches(node, '[data-math^="math:"] *')) {
+      nodes.push(node.nextSibling);
+      _results.push(dom(node).unwrap());
+    } else if ((node.previousSibling != null) && node.tagName === node.previousSibling.tagName) {
+      if (_.isEqual(dom(node).attributes(), dom(node.previousSibling).attributes())) {
+        nodes.push(node.firstChild);
+        _results.push(dom(node.previousSibling).merge(node));
+      } else {
+        _results.push(void 0);
+      }
+    } else {
+      _results.push(void 0);
+    }
+  }
+  return _results;
+};
+
+Line_findLeaf = Line.prototype.findLeaf;
+
+Line.prototype.findLeaf = function(leafNode) {
+  var curLeaf, found, leafNodeDom;
+  found = Line_findLeaf.apply(this, arguments);
+  if (found != null) {
+    return found;
+  } else {
+    leafNodeDom = dom(leafNode);
+    curLeaf = this.leaves.first;
+    while (curLeaf != null) {
+      if (leafNodeDom.isAncestor(curLeaf.node)) {
+        return curLeaf;
+      }
+      curLeaf = curLeaf.next;
+    }
+  }
+};
+
+Leaf_isLeafNode = Leaf.isLeafNode;
+
+Leaf.isLeafNode = function(node, formats) {
+  if (matches(node, '[data-math^="math:"] .katex')) {
+    return true;
+  }
+  return Leaf_isLeafNode.apply(this, arguments);
+};
+
+
+
+},{"quill":18}]},{},[1]);

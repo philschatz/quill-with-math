@@ -4,7 +4,7 @@
   "description": "",
   "main": "build.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "browserify --extension=coffee -t coffeeify foo.coffee -o build.js"
   },
   "author": "",
   "devDependencies": {
