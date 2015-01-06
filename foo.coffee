@@ -1,5 +1,6 @@
-Quill = require 'quill'
-MathTooltip = require './src/math-tooltip.coffee'
+katex   = require('katex')
+
+Quill = require('./src/math-tooltip.coffee')(katex)
 
 
 editor = new Quill('#editor')
@@ -12,10 +13,6 @@ editor.addModule('math-tooltip', true)
 # editor.addFormat 'math',
 #   attribute: 'data-math'
 #   tag: 'SPAN'
-
-
-
-
 
 
 

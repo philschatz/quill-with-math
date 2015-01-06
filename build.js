@@ -1,9 +1,9 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var MathTooltip, Quill, editor;
+var Quill, editor, katex;
 
-Quill = require('quill');
+katex = require('katex');
 
-MathTooltip = require('./src/math-tooltip.coffee');
+Quill = require('./src/math-tooltip.coffee')(katex);
 
 editor = new Quill('#editor');
 
@@ -21,7 +21,7 @@ window.Quill = Quill;
 
 
 
-},{"./src/math-tooltip.coffee":19,"quill":18}],2:[function(require,module,exports){
+},{"./src/math-tooltip.coffee":19,"katex":2}],2:[function(require,module,exports){
 /**
  * This is the main entry point for KaTeX. Here, we expose functions for
  * rendering expressions either to DOM nodes or to markup strings.
@@ -13621,15 +13621,13 @@ module.exports = SnowTheme;
 module.exports = require('./dist/quill');
 
 },{"./dist/quill":17}],19:[function(require,module,exports){
-var MathTooltip, Quill, Toolbar, Tooltip, dom, katex, renderAllMath, _,
+var MONKEYPATCH, Quill, Toolbar, Tooltip, dom, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Quill = require('quill');
 
-katex = require('katex');
-
-require('./monkeypatch.coffee');
+MONKEYPATCH = require('./monkeypatch.coffee');
 
 Toolbar = Quill.modules.toolbar;
 
@@ -13639,231 +13637,230 @@ _ = Quill.require('lodash');
 
 dom = Quill.require('dom');
 
-Toolbar.formats.TOOLTIP['math'] = 'math';
+module.exports = function(katex) {
+  var MathTooltip, renderAllMath;
+  MathTooltip = (function(_super) {
+    __extends(MathTooltip, _super);
 
-MathTooltip = (function(_super) {
-  __extends(MathTooltip, _super);
+    MathTooltip.DEFAULTS = {
+      maxLength: 50,
+      template: '<span class="title">Edit Formula &nbsp;</span> <input class="math-input" type="text"> <span>&nbsp;&#45;&nbsp;</span> <div class="preview"></div> <div class="preview-error"></div> <button class="cancel">Cancel</button> <button class="update">Update</button> <button class="remove">Remove</button>'
+    };
 
-  MathTooltip.DEFAULTS = {
-    maxLength: 50,
-    template: '<span class="title">Edit Formula &nbsp;</span> <input class="math-input" type="text"> <span>&nbsp;&#45;&nbsp;</span> <div class="preview"></div> <div class="preview-error"></div> <button class="cancel">Cancel</button> <button class="update">Update</button> <button class="remove">Remove</button>'
-  };
+    function MathTooltip(quill, options) {
+      this.quill = quill;
+      this.options = options;
+      Toolbar.formats.TOOLTIP['math'] = 'math';
+      this.options = _.defaults(this.options, Tooltip.DEFAULTS);
+      MathTooltip.__super__.constructor.call(this, this.quill, this.options);
+      dom(this.container).addClass('ql-math-tooltip');
+      this.textbox = this.container.querySelector('.math-input');
+      this.preview = this.container.querySelector('.preview');
+      this.previewError = this.container.querySelector('.preview-error');
+      this.updateButton = this.container.querySelector('.update');
+      this.removeButton = this.container.querySelector('.remove');
+      this.initListeners();
+    }
 
-  function MathTooltip(quill, options) {
-    this.quill = quill;
-    this.options = options;
-    this.options = _.defaults(this.options, Tooltip.DEFAULTS);
-    MathTooltip.__super__.constructor.call(this, this.quill, this.options);
-    dom(this.container).addClass('ql-math-tooltip');
-    this.textbox = this.container.querySelector('.math-input');
-    this.preview = this.container.querySelector('.preview');
-    this.previewError = this.container.querySelector('.preview-error');
-    this.updateButton = this.container.querySelector('.update');
-    this.removeButton = this.container.querySelector('.remove');
-    this.initListeners();
-  }
+    MathTooltip.prototype.initListeners = function() {
+      this.quill.on(this.quill.constructor.events.SELECTION_CHANGE, (function(_this) {
+        return function(range) {
+          var anchor, formula;
+          renderAllMath(_this.quill);
+          if (!((range != null) && range.isCollapsed())) {
+            return;
+          }
+          anchor = _this._findAnchor(range);
+          if (anchor) {
+            formula = dom(anchor).attributes()['data-math'].substring('math:'.length);
+            _this.setMode(formula, true);
+            _this._currentInitialFormula = formula;
+            _this._currentMathEl = anchor;
+            return _this.show(anchor);
+          } else {
+            _this.range = null;
+            _this.range = null;
+            return _this.hide();
+          }
+        };
+      })(this));
+      dom(this.updateButton).on('click', _.bind(this.saveMath, this));
+      dom(this.removeButton).on('click', _.bind(this.removeMath, this));
+      dom(this.container.querySelector('.cancel')).on('click', _.bind(this.hide, this));
+      this.range = null;
+      this.initTextbox(this.textbox, this.saveMath, this.hide);
+      this._updateMathPreview();
+      this.quill.onModuleLoad('toolbar', (function(_this) {
+        return function(toolbar) {
+          return toolbar.initFormat('math', _.bind(_this._onToolbar, _this));
+        };
+      })(this));
+      dom(this.textbox).on('keyup', _.bind(this._updateMathPreview, this));
+      return renderAllMath(this.quill);
+    };
 
-  MathTooltip.prototype.initListeners = function() {
-    this.quill.on(this.quill.constructor.events.SELECTION_CHANGE, (function(_this) {
-      return function(range) {
-        var anchor, formula;
-        renderAllMath(_this.quill);
-        if (!((range != null) && range.isCollapsed())) {
-          return;
+    MathTooltip.prototype._updateMathPreview = function() {
+      var e, formula;
+      formula = this.textbox.value;
+      if (formula !== this._currentInitialFormula) {
+        try {
+          katex.render(formula, this.preview);
+          dom(this.updateButton).removeClass('disabled');
+          return this.previewError.innerHTML = '';
+        } catch (_error) {
+          e = _error;
+          dom(this.updateButton).addClass('disabled');
+          this.preview.innerHTML = '';
+          return this.previewError.innerHTML = "Parse Problem: " + e.message;
         }
-        anchor = _this._findAnchor(range);
-        if (anchor) {
-          formula = dom(anchor).attributes()['data-math'].substring('math:'.length);
-          _this.setMode(formula, true);
-          _this._currentInitialFormula = formula;
-          _this._currentMathEl = anchor;
-          return _this.show(anchor);
-        } else {
-          _this.range = null;
-          _this.range = null;
-          return _this.hide();
-        }
-      };
-    })(this));
-    dom(this.updateButton).on('click', _.bind(this.saveMath, this));
-    dom(this.removeButton).on('click', _.bind(this.removeMath, this));
-    dom(this.container.querySelector('.cancel')).on('click', _.bind(this.hide, this));
-    this.range = null;
-    this.initTextbox(this.textbox, this.saveMath, this.hide);
-    this._updateMathPreview();
-    this.quill.onModuleLoad('toolbar', (function(_this) {
-      return function(toolbar) {
-        return toolbar.initFormat('math', _.bind(_this._onToolbar, _this));
-      };
-    })(this));
-    dom(this.textbox).on('keyup', _.bind(this._updateMathPreview, this));
-    return renderAllMath(this.quill);
-  };
-
-  MathTooltip.prototype._updateMathPreview = function() {
-    var e, formula;
-    formula = this.textbox.value;
-    if (formula !== this._currentInitialFormula) {
-      try {
-        katex.render(formula, this.preview);
-        dom(this.updateButton).removeClass('disabled');
-        return this.previewError.innerHTML = '';
-      } catch (_error) {
-        e = _error;
+      } else {
         dom(this.updateButton).addClass('disabled');
         this.preview.innerHTML = '';
-        return this.previewError.innerHTML = "Parse Problem: " + e.message;
+        return this.previewError.innerHTML = '';
       }
-    } else {
-      dom(this.updateButton).addClass('disabled');
-      this.preview.innerHTML = '';
-      return this.previewError.innerHTML = '';
-    }
-  };
+    };
 
-  MathTooltip.prototype.renderMath = function(node) {
-    var e, formula;
-    formula = dom(node).attributes()['data-math'].substring('math:'.length);
-    try {
-      return katex.render(formula, node);
-    } catch (_error) {
-      e = _error;
-      return node.innerHTML = e.message;
-    }
-  };
+    MathTooltip.prototype.renderMath = function(node) {
+      var e, formula;
+      formula = dom(node).attributes()['data-math'].substring('math:'.length);
+      try {
+        return katex.render(formula, node);
+      } catch (_error) {
+        e = _error;
+        return node.innerHTML = e.message;
+      }
+    };
 
-  MathTooltip.prototype.show = function() {
-    this._updateMathPreview();
-    return MathTooltip.__super__.show.apply(this, arguments);
-  };
+    MathTooltip.prototype.show = function() {
+      this._updateMathPreview();
+      return MathTooltip.__super__.show.apply(this, arguments);
+    };
 
-  MathTooltip.prototype.hide = function() {
-    this.range = null;
-    this._currentInitialFormula = null;
-    return MathTooltip.__super__.hide.apply(this, arguments);
-  };
+    MathTooltip.prototype.hide = function() {
+      this.range = null;
+      this._currentInitialFormula = null;
+      return MathTooltip.__super__.hide.apply(this, arguments);
+    };
 
-  MathTooltip.prototype.saveMath = function() {
-    var anchor, e, formula, math, url, _i, _len, _ref;
-    url = this.textbox.value;
-    if (this.range != null) {
-      if (this.range.isCollapsed()) {
-        anchor = this._findAnchor(this.range);
-        if (anchor != null) {
-          dom(anchor).attributes({
-            'data-math': "math:" + url
-          });
-        }
-        this.renderMath(anchor);
-      } else {
-        this.quill.formatText(this.range, 'math', "math:" + url, 'user');
-        _ref = this.quill.editor.root.querySelectorAll('[data-math^="math:"]');
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          math = _ref[_i];
-          formula = dom(math).attributes()['data-math'].substring('math:'.length);
-          try {
-            katex.render(formula, math);
-          } catch (_error) {
-            e = _error;
-            console.log('Error: Invalid math');
+    MathTooltip.prototype.saveMath = function() {
+      var anchor, e, formula, math, url, _i, _len, _ref;
+      url = this.textbox.value;
+      if (this.range != null) {
+        if (this.range.isCollapsed()) {
+          anchor = this._findAnchor(this.range);
+          if (anchor != null) {
+            dom(anchor).attributes({
+              'data-math': "math:" + url
+            });
+          }
+          this.renderMath(anchor);
+        } else {
+          this.quill.formatText(this.range, 'math', "math:" + url, 'user');
+          _ref = this.quill.editor.root.querySelectorAll('[data-math^="math:"]');
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            math = _ref[_i];
+            formula = dom(math).attributes()['data-math'].substring('math:'.length);
+            try {
+              katex.render(formula, math);
+            } catch (_error) {
+              e = _error;
+              console.log('Error: Invalid math');
+            }
           }
         }
       }
-    }
-    this.setMode(url, false);
-    return this.hide();
-  };
+      this.setMode(url, false);
+      return this.hide();
+    };
 
-  MathTooltip.prototype.removeMath = function() {
-    var formula, node, _ref;
-    node = this._findAnchor(this.range);
-    formula = (_ref = dom(node).attributes()['data-math']) != null ? _ref.substring('math:'.length) : void 0;
-    node.removeAttribute('data-math');
-    node = dom(node).switchTag(dom.DEFAULT_INLINE_TAG);
-    node.removeClass('loaded');
-    return node.text(formula);
-  };
+    MathTooltip.prototype.removeMath = function() {
+      var formula, node, _ref;
+      node = this._findAnchor(this.range);
+      formula = (_ref = dom(node).attributes()['data-math']) != null ? _ref.substring('math:'.length) : void 0;
+      node.removeAttribute('data-math');
+      node = dom(node).switchTag(dom.DEFAULT_INLINE_TAG);
+      node.removeClass('loaded');
+      return node.text(formula);
+    };
 
-  MathTooltip.prototype.setMode = function(url, edit) {
-    if (edit == null) {
-      edit = false;
-    }
-    if (edit) {
-      this.textbox.value = url;
-      _.defer((function(_this) {
-        return function() {
-          _this.textbox.focus();
-          return _this.textbox.setSelectionRange(url.length, url.length);
-        };
-      })(this));
-    } else {
-      this.textbox.value = url;
-    }
-    return dom(this.container).toggleClass('editing', edit);
-  };
-
-  MathTooltip.prototype._findAnchor = function(range) {
-    var leaf, node, offset, _ref, _ref1;
-    _ref = this.quill.editor.doc.findLeafAt(range.start, true), leaf = _ref[0], offset = _ref[1];
-    if (leaf != null) {
-      node = leaf.node;
-    }
-    while (node != null) {
-      if ((_ref1 = dom(node).attributes()['data-math']) != null ? _ref1.substring('math:'.length) : void 0) {
-        return node;
+    MathTooltip.prototype.setMode = function(url, edit) {
+      if (edit == null) {
+        edit = false;
       }
-      node = node.parentNode;
+      if (edit) {
+        this.textbox.value = url;
+        _.defer((function(_this) {
+          return function() {
+            _this.textbox.focus();
+            return _this.textbox.setSelectionRange(url.length, url.length);
+          };
+        })(this));
+      } else {
+        this.textbox.value = url;
+      }
+      return dom(this.container).toggleClass('editing', edit);
+    };
+
+    MathTooltip.prototype._findAnchor = function(range) {
+      var leaf, node, offset, _ref, _ref1;
+      _ref = this.quill.editor.doc.findLeafAt(range.start, true), leaf = _ref[0], offset = _ref[1];
+      if (leaf != null) {
+        node = leaf.node;
+      }
+      while (node != null) {
+        if ((_ref1 = dom(node).attributes()['data-math']) != null ? _ref1.substring('math:'.length) : void 0) {
+          return node;
+        }
+        node = node.parentNode;
+      }
+      return null;
+    };
+
+    MathTooltip.prototype._onToolbar = function(range, value) {
+      var nativeRange;
+      if (!(range && !range.isCollapsed())) {
+        return;
+      }
+      if (value) {
+        this.setMode(this._suggestURL(range), true);
+        nativeRange = this.quill.editor.selection._getNativeRange();
+        return this.show(nativeRange);
+      }
+    };
+
+    MathTooltip.prototype._suggestURL = function(range) {
+      var text;
+      text = this.quill.getText(range);
+      return text;
+    };
+
+    return MathTooltip;
+
+  })(Tooltip);
+  renderAllMath = function(quill) {
+    var e, formula, math, _i, _len, _ref, _results;
+    _ref = quill.editor.root.querySelectorAll('[data-math^="math:"]:not(.loaded)');
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      math = _ref[_i];
+      formula = dom(math).attributes()['data-math'].substring('math:'.length);
+      try {
+        katex.render(formula, math);
+        _results.push(math.classList.add('loaded'));
+      } catch (_error) {
+        e = _error;
+        _results.push(console.log('Error: Invalid math'));
+      }
     }
-    return null;
+    return _results;
   };
-
-  MathTooltip.prototype._onToolbar = function(range, value) {
-    var nativeRange;
-    if (!(range && !range.isCollapsed())) {
-      return;
-    }
-    if (value) {
-      this.setMode(this._suggestURL(range), true);
-      nativeRange = this.quill.editor.selection._getNativeRange();
-      return this.show(nativeRange);
-    }
-  };
-
-  MathTooltip.prototype._suggestURL = function(range) {
-    var text;
-    text = this.quill.getText(range);
-    return text;
-  };
-
-  return MathTooltip;
-
-})(Tooltip);
-
-renderAllMath = function(quill) {
-  var e, formula, math, _i, _len, _ref, _results;
-  _ref = quill.editor.root.querySelectorAll('[data-math^="math:"]:not(.loaded)');
-  _results = [];
-  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-    math = _ref[_i];
-    formula = dom(math).attributes()['data-math'].substring('math:'.length);
-    try {
-      katex.render(formula, math);
-      _results.push(math.classList.add('loaded'));
-    } catch (_error) {
-      e = _error;
-      _results.push(console.log('Error: Invalid math'));
-    }
-  }
-  return _results;
+  Quill.registerModule('math-tooltip', MathTooltip);
+  return Quill;
 };
 
-Quill.registerModule('math-tooltip', MathTooltip);
-
-module.exports = MathTooltip;
 
 
-
-},{"./monkeypatch.coffee":20,"katex":2,"quill":18}],20:[function(require,module,exports){
+},{"./monkeypatch.coffee":20,"quill":18}],20:[function(require,module,exports){
 var Format, Leaf, Leaf_isLeafNode, Line, Line_findLeaf, Normalizer, Normalizer_optimizeLine, Normalizer_whitelistStyles, Quill, dom, matches, _;
 
 Quill = require('quill');
@@ -13879,6 +13876,10 @@ Line = Quill.require('core/line');
 Leaf = Quill.require('core/leaf');
 
 Format = Quill.require('core/format');
+
+if (!Normalizer) {
+  throw new Error('BUG: Need a custom version of Quill that exposes normalizer');
+}
 
 Quill.DEFAULTS.formats.push('math');
 

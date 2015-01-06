@@ -8,6 +8,8 @@ Line        = Quill.require 'core/line'
 Leaf        = Quill.require 'core/leaf'
 Format      = Quill.require 'core/format'
 
+throw new Error('BUG: Need a custom version of Quill that exposes normalizer') unless Normalizer
+
 Quill.DEFAULTS.formats.push('math')
 
 # Add math to the default formats so the paste-manager div can handle them instead of just stripping the math span out
