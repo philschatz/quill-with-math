@@ -4,7 +4,7 @@
   "description": "",
   "main": "build.js",
   "scripts": {
-    "test": "browserify --extension=coffee -t coffeeify foo.coffee -o build.js"
+    "test": "browserify --extension=coffee -t coffeeify src/index.coffee -o build.js"
   },
   "author": "",
   "devDependencies": {

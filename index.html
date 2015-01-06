@@ -52,7 +52,12 @@
 
 <!-- Include the Quill library -->
 <script src="./build.js"></script>
-
+<script>
+  editor = new Quill('#editor')
+  editor.addModule('toolbar', { container: '#toolbar' })
+  editor.addModule('link-tooltip', true)
+  editor.addModule('math-tooltip', true)
+</script>
 </body>
 
 </html>

@@ -1,6 +1,4 @@
 Quill = require 'quill'
-MONKEYPATCH = require './monkeypatch.coffee' # Apply patches so copy/paste works and so `math` is one of the formats
-
 
 Toolbar = Quill.modules.toolbar
 Tooltip = Quill.modules.tooltip
@@ -194,5 +192,4 @@ module.exports = (katex) ->
         console.log 'Error: Invalid math'
 
 
-  Quill.registerModule('math-tooltip', MathTooltip)
-  return Quill
+  return MathTooltip

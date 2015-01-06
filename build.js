@@ -1,27 +1,4 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Quill, editor, katex;
-
-katex = require('katex');
-
-Quill = require('./src/math-tooltip.coffee')(katex);
-
-editor = new Quill('#editor');
-
-editor.addModule('toolbar', {
-  container: '#toolbar'
-});
-
-editor.addModule('link-tooltip', true);
-
-editor.addModule('math-tooltip', true);
-
-window.EDITOR = editor;
-
-window.Quill = Quill;
-
-
-
-},{"./src/math-tooltip.coffee":19,"katex":2}],2:[function(require,module,exports){
 /**
  * This is the main entry point for KaTeX. Here, we expose functions for
  * rendering expressions either to DOM nodes or to markup strings.
@@ -77,7 +54,7 @@ module.exports = {
     ParseError: ParseError
 };
 
-},{"./src/ParseError":5,"./src/buildTree":9,"./src/parseTree":14,"./src/utils":16}],3:[function(require,module,exports){
+},{"./src/ParseError":4,"./src/buildTree":8,"./src/parseTree":13,"./src/utils":15}],2:[function(require,module,exports){
 /**
  * The Lexer class handles tokenizing the input in various ways. Since our
  * parser expects us to be able to backtrack, the lexer allows lexing from any
@@ -269,7 +246,7 @@ Lexer.prototype.lex = function(pos, mode) {
 
 module.exports = Lexer;
 
-},{"./ParseError":5}],4:[function(require,module,exports){
+},{"./ParseError":4}],3:[function(require,module,exports){
 /**
  * This file contains information about the options that the Parser carries
  * around with it while parsing. Data is held in an `Options` object, and when
@@ -356,7 +333,7 @@ Options.prototype.getColor = function() {
 
 module.exports = Options;
 
-},{}],5:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 /**
  * This is the ParseError class, which is the main error thrown by KaTeX
  * functions when something has gone wrong. This is used to distinguish internal
@@ -398,7 +375,7 @@ ParseError.prototype.__proto__ = Error.prototype;
 
 module.exports = ParseError;
 
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 var functions = require("./functions");
 var Lexer = require("./Lexer");
 var symbols = require("./symbols");
@@ -1039,7 +1016,7 @@ Parser.prototype.parseSymbol = function(pos, mode) {
 
 module.exports = Parser;
 
-},{"./Lexer":3,"./ParseError":5,"./functions":13,"./symbols":15,"./utils":16}],7:[function(require,module,exports){
+},{"./Lexer":2,"./ParseError":4,"./functions":12,"./symbols":14,"./utils":15}],6:[function(require,module,exports){
 /**
  * This file contains information and classes for the various kinds of styles
  * used in TeX. It provides a generic `Style` class, which holds information
@@ -1167,7 +1144,7 @@ module.exports = {
     SCRIPTSCRIPT: styles[SS]
 };
 
-},{}],8:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /**
  * This module contains general functions that can be used for building
  * different kinds of domTree nodes in a consistent manner.
@@ -1440,7 +1417,7 @@ module.exports = {
     makeVList: makeVList
 };
 
-},{"./domTree":11,"./fontMetrics":12,"./symbols":15}],9:[function(require,module,exports){
+},{"./domTree":10,"./fontMetrics":11,"./symbols":14}],8:[function(require,module,exports){
 /**
  * This file does the main work of building a domTree structure from a parse
  * tree. The entry point is the `buildTree` function, which takes a parse tree.
@@ -2609,7 +2586,7 @@ var buildTree = function(tree) {
 
 module.exports = buildTree;
 
-},{"./Options":4,"./ParseError":5,"./Style":7,"./buildCommon":8,"./delimiter":10,"./domTree":11,"./fontMetrics":12,"./utils":16}],10:[function(require,module,exports){
+},{"./Options":3,"./ParseError":4,"./Style":6,"./buildCommon":7,"./delimiter":9,"./domTree":10,"./fontMetrics":11,"./utils":15}],9:[function(require,module,exports){
 /**
  * This file deals with creating delimiters of various sizes. The TeXbook
  * discusses these routines on page 441-442, in the "Another subroutine sets box
@@ -3152,7 +3129,7 @@ module.exports = {
     leftRightDelim: makeLeftRightDelim
 };
 
-},{"./ParseError":5,"./Style":7,"./buildCommon":8,"./fontMetrics":12,"./symbols":15,"./utils":16}],11:[function(require,module,exports){
+},{"./ParseError":4,"./Style":6,"./buildCommon":7,"./fontMetrics":11,"./symbols":14,"./utils":15}],10:[function(require,module,exports){
 /**
  * These objects store the data about the DOM nodes we create, as well as some
  * extra data. They can then be transformed into real DOM nodes with the toNode
@@ -3395,7 +3372,7 @@ module.exports = {
     symbolNode: symbolNode
 };
 
-},{"./utils":16}],12:[function(require,module,exports){
+},{"./utils":15}],11:[function(require,module,exports){
 /* jshint unused:false */
 
 var Style = require("./Style");
@@ -3526,7 +3503,7 @@ module.exports = {
     getCharacterMetrics: getCharacterMetrics
 };
 
-},{"./Style":7}],13:[function(require,module,exports){
+},{"./Style":6}],12:[function(require,module,exports){
 var utils = require("./utils");
 var ParseError = require("./ParseError");
 
@@ -4067,7 +4044,7 @@ module.exports = {
     getGreediness: getGreediness
 };
 
-},{"./ParseError":5,"./utils":16}],14:[function(require,module,exports){
+},{"./ParseError":4,"./utils":15}],13:[function(require,module,exports){
 /**
  * Provides a single function for parsing an expression using a Parser
  * TODO(emily): Remove this
@@ -4086,7 +4063,7 @@ var parseTree = function(toParse) {
 
 module.exports = parseTree;
 
-},{"./Parser":6}],15:[function(require,module,exports){
+},{"./Parser":5}],14:[function(require,module,exports){
 /**
  * This file holds a list of all no-argument functions and single-character
  * symbols (like 'a' or ';').
@@ -5094,7 +5071,7 @@ for (var i = 0; i < letters.length; i++) {
 
 module.exports = symbols;
 
-},{}],16:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 /**
  * This file contains a list of utility functions which are useful in other
  * files.
@@ -5193,7 +5170,7 @@ module.exports = {
     clearNode: clearNode
 };
 
-},{}],17:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 (function (global){
 /*! Quill Editor v0.19.7
  *  https://quilljs.com/
@@ -13617,17 +13594,28 @@ module.exports = SnowTheme;
 },{"../../lib/color-picker":15,"../../lib/dom":16,"../../lib/picker":19,"../base":32,"lodash":1}]},{},[14])(14)
 });
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],18:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 module.exports = require('./dist/quill');
 
-},{"./dist/quill":17}],19:[function(require,module,exports){
-var MONKEYPATCH, Quill, Toolbar, Tooltip, dom, _,
+},{"./dist/quill":16}],18:[function(require,module,exports){
+var Quill, katex;
+
+katex = require('katex');
+
+Quill = require('./quill-with-math.coffee')(katex);
+
+module.exports = Quill;
+
+window.Quill = Quill;
+
+
+
+},{"./quill-with-math.coffee":21,"katex":1}],19:[function(require,module,exports){
+var Quill, Toolbar, Tooltip, dom, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Quill = require('quill');
-
-MONKEYPATCH = require('./monkeypatch.coffee');
 
 Toolbar = Quill.modules.toolbar;
 
@@ -13644,7 +13632,7 @@ module.exports = function(katex) {
 
     MathTooltip.DEFAULTS = {
       maxLength: 50,
-      template: '<span class="title">Edit Formula &nbsp;</span> <input class="math-input" type="text"> <span>&nbsp;&#45;&nbsp;</span> <div class="preview"></div> <div class="preview-error"></div> <button class="cancel">Cancel</button> <button class="update">Update</button> <button class="remove">Remove</button>'
+      template: '<span class="title">Edit Formula &nbsp;</span> <input class="math-input" type="text" spellcheck="false"> <span>&nbsp;&#45;&nbsp;</span> <div class="preview"></div> <div class="preview-error"></div> <button class="cancel">Cancel</button> <button class="update">Update</button> <button class="remove">Remove</button>'
     };
 
     function MathTooltip(quill, options) {
@@ -13854,13 +13842,12 @@ module.exports = function(katex) {
     }
     return _results;
   };
-  Quill.registerModule('math-tooltip', MathTooltip);
-  return Quill;
+  return MathTooltip;
 };
 
 
 
-},{"./monkeypatch.coffee":20,"quill":18}],20:[function(require,module,exports){
+},{"quill":17}],20:[function(require,module,exports){
 var Format, Leaf, Leaf_isLeafNode, Line, Line_findLeaf, Normalizer, Normalizer_optimizeLine, Normalizer_whitelistStyles, Quill, dom, matches, _;
 
 Quill = require('quill');
@@ -13975,4 +13962,22 @@ Leaf.isLeafNode = function(node, formats) {
 
 
 
-},{"quill":18}]},{},[1]);
+},{"quill":17}],21:[function(require,module,exports){
+var MONKEYPATCH, MathTooltipFn, Quill;
+
+Quill = require('quill');
+
+MathTooltipFn = require('./math-tooltip.coffee');
+
+MONKEYPATCH = require('./monkeypatch.coffee');
+
+module.exports = function(katex) {
+  var MathTooltip;
+  MathTooltip = MathTooltipFn(katex);
+  Quill.registerModule('math-tooltip', MathTooltip);
+  return Quill;
+};
+
+
+
+},{"./math-tooltip.coffee":19,"./monkeypatch.coffee":20,"quill":17}]},{},[18]);
