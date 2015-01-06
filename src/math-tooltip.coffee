@@ -15,7 +15,7 @@ module.exports = (katex) ->
       maxLength: 50
       template:
        '<span class="title">Edit Formula &nbsp;</span>
-        <input class="math-input" type="text">
+        <input class="math-input" type="text" spellcheck="false">
         <span>&nbsp;&#45;&nbsp;</span>
         <div class="preview"></div>
         <div class="preview-error"></div>
