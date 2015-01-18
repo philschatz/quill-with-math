@@ -1,6 +1,6 @@
 Quill = require 'quill'
-MathTooltipFn = require './math-tooltip.coffee'
-MONKEYPATCH = require './monkeypatch.coffee' # Apply patches so copy/paste works and so `math` is one of the formats
+MathTooltipFn = require './math-tooltip'
+MONKEYPATCH = require './monkeypatch' # Apply patches so copy/paste works and so `math` is one of the formats
 
 
 # Provide a version of katex to use so we do not include multiple versions

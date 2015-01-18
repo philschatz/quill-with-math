@@ -2,9 +2,11 @@
   "name": "quill-with-math",
   "version": "0.0.1",
   "description": "QuillJS with support for editing Math using KaTeX",
-  "main": "build.js",
+  "main": "index.js",
   "scripts": {
-    "test": "browserify --extension=coffee -t coffeeify src/index.coffee -o build.js"
+    "prepublish": "coffee -o ./build/ -c ./src/*.coffee",
+    "install": "coffee -o ./build/ -c ./src/*.coffee",
+    "test": "coffee -o ./build/ -c ./src/*.coffee && browserify ./build/index.js -o ./test-build.js"
   },
   "author": "",
   "devDependencies": {
