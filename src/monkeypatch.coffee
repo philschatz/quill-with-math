@@ -28,7 +28,7 @@ matches = (el, selector) ->
 Normalizer_whitelistStyles = Normalizer.whitelistStyles
 Normalizer.whitelistStyles = (node) ->
   # Check parents of the node to see if it is inside a 'katex' span
-  return if matches(node, '[data-math^="math:"] *')
+  return if matches(node, '[data-math] *')
   Normalizer_whitelistStyles(node)
 
 
@@ -45,7 +45,7 @@ Normalizer.optimizeLine = (lineNode) ->
       if node.tagName == dom.DEFAULT_BREAK_TAG
         # Remove unneeded BRs
         dom(node).remove() unless lineNodeLength == 0
-      else if dom(node).length() == 0 and not matches(node, '[data-math^="math:"] *')
+      else if dom(node).length() == 0 and not matches(node, '[data-math] *')
         nodes.push(node.nextSibling)
         dom(node).unwrap()
       else if node.previousSibling? and node.tagName == node.previousSibling.tagName
@@ -57,7 +57,7 @@ Normalizer.optimizeLine = (lineNode) ->
 
 # Line_buildLeaves = Line::buildLeaves
 # Line::buildLeaves = (node, formats) ->
-#   if matches(node, '[data-math^="math:"]')
+#   if matches(node, '[data-math]')
 #     # Strip the HTML child nodes so the range/leaf calculator works, but then put the rendered katex output back
 #     # node.classList.remove('loaded')
 #     # innerHTML = node.innerHTML
@@ -85,5 +85,5 @@ Line::findLeaf = (leafNode) ->
 
 Leaf_isLeafNode = Leaf.isLeafNode
 Leaf.isLeafNode = (node, formats) ->
-  return true if matches(node, '[data-math^="math:"] .katex')
+  return true if matches(node, '[data-math] .katex')
   return Leaf_isLeafNode.apply(@, arguments)

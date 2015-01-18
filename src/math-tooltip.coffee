@@ -43,11 +43,11 @@ module.exports = (katex) ->
         return unless range? and range.isCollapsed()
         anchor = @_findAnchor(range)
         if anchor
-          # @setMode(dom(anchor).attributes()['data-math'].substring('math:'.length), false)
+          # @setMode(dom(anchor).attributes()['data-math'], false)
 
           # @quill.setSelection(start, end)
 
-          formula = dom(anchor).attributes()['data-math'].substring('math:'.length)
+          formula = dom(anchor).attributes()['data-math']
           @setMode(formula, true)
           @_currentInitialFormula = formula
           @_currentMathEl = anchor
@@ -95,7 +95,7 @@ module.exports = (katex) ->
 
 
     renderMath: (node) ->
-      formula = dom(node).attributes()['data-math'].substring('math:'.length)
+      formula = dom(node).attributes()['data-math']
       try
         katex.render(formula, node)
       catch e
@@ -117,13 +117,13 @@ module.exports = (katex) ->
       if @range?
         if @range.isCollapsed()
           anchor = @_findAnchor(@range)
-          dom(anchor).attributes({'data-math':"math:#{url}"}) if anchor?
+          dom(anchor).attributes({'data-math':url}) if anchor?
           @renderMath(anchor)
         else
-          @quill.formatText(@range, 'math', "math:#{url}", 'user')
+          @quill.formatText(@range, 'math', url, 'user')
           # HACK: Render all Math. Should only render new Math elements (:not(.rendered))
-          for math in @quill.editor.root.querySelectorAll('[data-math^="math:"]')
-            formula = dom(math).attributes()['data-math'].substring('math:'.length)
+          for math in @quill.editor.root.querySelectorAll('[data-math]')
+            formula = dom(math).attributes()['data-math']
             try
               katex.render(formula, math)
             catch e
@@ -162,7 +162,7 @@ module.exports = (katex) ->
       [leaf, offset] = @quill.editor.doc.findLeafAt(range.start, true)
       node = leaf.node if leaf?
       while node?
-        return node if dom(node).attributes()['data-math']?.substring('math:'.length)
+        return node if dom(node).attributes()['data-math']?
         node = node.parentNode
       return null
 
@@ -182,9 +182,9 @@ module.exports = (katex) ->
 
   renderAllMath = (quill) ->
     # Render math
-    for math in quill.editor.root.querySelectorAll('[data-math^="math:"]:not(.loaded)')
+    for math in quill.editor.root.querySelectorAll('[data-math]:not(.loaded)')
       # math.contentEditable = false
-      formula = dom(math).attributes()['data-math'].substring('math:'.length)
+      formula = dom(math).attributes()['data-math']
       try
         katex.render(formula, math)
         math.classList.add('loaded')
