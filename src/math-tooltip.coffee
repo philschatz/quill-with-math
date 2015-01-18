@@ -59,7 +59,7 @@ module.exports = (katex) ->
       )
       dom(@updateButton).on('click', _.bind(@saveMath, @))
       dom(@removeButton).on('click', _.bind(@removeMath, @))
-      dom(@container.querySelector('.cancel')).on('click', _.bind(@hide, @))
+      dom(@container.querySelector('.cancel')).on('click', _.bind(@hideOrRemoveMath, @))
       # dom(@container.querySelector('.change')).on('click', =>
       #   @setMode(dom(@link).attributes()['data-math'].substring('#'.length), true)
       @range = null # Tooltip.hide will try to use this which causes the tooltip to open back up
@@ -111,6 +111,14 @@ module.exports = (katex) ->
       @_currentInitialFormula = null
       super(arguments...)
 
+    # Cancel can be pressed when adding new math (from toolbar) at which point it should be unwrapped
+    hideOrRemoveMath: ->
+      node = @_findAnchor(@range)
+      if node and dom(node).attributes()['data-math'] isnt 'true'
+        @hide(arguments...)
+      else
+        @removeMath(arguments...)
+        @hide(arguments...)
 
     saveMath: ->
       url = @textbox.value
@@ -135,12 +143,23 @@ module.exports = (katex) ->
 
     removeMath: ->
       node = @_findAnchor(@range)
-      formula = dom(node).attributes()['data-math']?.substring('math:'.length)
+      # If nothing could be found (it was just added by clicking on the toolbar)
+      # Then search for it manually
+      if node
+        formula = dom(node).attributes()['data-math']
+        node.removeAttribute('data-math')
+        node = dom(node).switchTag(dom.DEFAULT_INLINE_TAG)
+        node.removeClass('loaded')
+        node.text(formula) unless formula is 'true' # HACK
 
-      node.removeAttribute('data-math')
-      node = dom(node).switchTag(dom.DEFAULT_INLINE_TAG)
-      node.removeClass('loaded')
-      node.text(formula)
+      else
+        addedNodes = @quill.editor.doc.root.querySelectorAll('[data-math="true"]') # HACK
+        addedNodes = [addedNodes...] # Maintain a non-live list of nodes
+        for node in addedNodes
+          node.removeAttribute('data-math')
+          node = dom(node).switchTag(dom.DEFAULT_INLINE_TAG)
+          node.removeClass('loaded')
+
 
 
     setMode: (url, edit = false) ->
@@ -185,6 +204,7 @@ module.exports = (katex) ->
     for math in quill.editor.root.querySelectorAll('[data-math]:not(.loaded)')
       # math.contentEditable = false
       formula = dom(math).attributes()['data-math']
+      continue if formula is 'true' # Hack. When the toolbar adds new math (wraps it in a <span data-math> the data-math attribute is set to "true" since there is no value)
       try
         katex.render(formula, math)
         math.classList.add('loaded')
