@@ -14,14 +14,15 @@ module.exports = (katex) ->
     @DEFAULTS:
       maxLength: 50
       template:
-       '<span class="title">Edit Formula &nbsp;</span>
+       '<span class="title">Formula: </span>
         <input class="math-input" type="text" spellcheck="false">
-        <span>&nbsp;&#45;&nbsp;</span>
         <div class="preview"></div>
         <div class="preview-error"></div>
-        <button class="cancel">Cancel</button>
-        <button class="update">Update</button>
-        <button class="remove">Remove</button>'
+        <div class="ql-btn-group">
+          <button class="cancel">Cancel</button>
+          <button class="update">Update</button>
+          <button class="remove">Remove</button>
+        </div>'
 
     constructor: (@quill, @options) ->
 
@@ -103,6 +104,8 @@ module.exports = (katex) ->
 
 
     show: ->
+      # Hack for CSS :focus. Add a class on the editor
+      @quill.editor.doc.root.classList.add('ql-has-active-popup')
       @_updateMathPreview()
       super(arguments...)
 
@@ -110,6 +113,10 @@ module.exports = (katex) ->
       @range = null # Tooltip.hide will try to use this which causes the tooltip to open back up
       @_currentInitialFormula = null
       super(arguments...)
+
+      # Hack for CSS :focus. Ensure quill gets focus back
+      @quill.editor.doc.root.classList.remove('ql-has-active-popup')
+      # @quill.focus() # Can't use this because quill calls hide on all popups
 
     # Cancel can be pressed when adding new math (from toolbar) at which point it should be unwrapped
     hideOrRemoveMath: ->
