@@ -9,13 +9,11 @@
     "test": "coffee -o ./build/ -c ./src/*.coffee && browserify ./build/index.js -o ./test-build.js"
   },
   "author": "",
-  "dependencies": {
-    "quill": "philschatz/quill#normalizer"
-  },
   "devDependencies": {
     "coffeeify": "^1.0.0",
     "dom": "0.0.3",
     "katex": "^0.1.1",
-    "lodash": "^2.4.1"
+    "lodash": "^2.4.1",
+    "quill": "philschatz/quill#normalizer"
   }
 }
